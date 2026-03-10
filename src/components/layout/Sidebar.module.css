@@ -215,7 +215,7 @@
   .mobileBar {
     display: flex;
     position: fixed;
-    bottom: 16px;
+    top: 12px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 200;
