@@ -302,6 +302,19 @@
   min-width: 0;
 }
 
+.previewContainer.dark {
+  background: #1a1a2e;
+}
+
+.previewContainer.dark :global(.docx-wrapper) {
+  background: #1a1a2e !important;
+}
+
+.previewContainer.dark :global(.docx-wrapper > section.docx) {
+  background: #252540 !important;
+  color: #e0e0e8 !important;
+}
+
 /* Override docx-preview wrapper — the scrollable area */
 .previewContainer :global(.docx-wrapper) {
   background: #d4d4d4 !important;

@@ -15,6 +15,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { GlassCard, Button, FileDropZone } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
+import { useSettingsStore } from '@/store/useSettingsStore.ts';
 import styles from './BatchEdit.module.css';
 
 interface BatchFile {
@@ -35,6 +36,7 @@ export function BatchEdit() {
   const [toast, setToast] = useState<{ text: string; detail: string } | null>(null);
   const [matchStats, setMatchStats] = useState({ totalMatches: 0, filesWithMatches: 0 });
   const previewRef = useRef<HTMLDivElement>(null);
+  const darkPreview = useSettingsStore((s) => s.darkPreview);
 
   const selectedFile = files.find((f) => f.id === selectedId);
 
@@ -427,7 +429,7 @@ export function BatchEdit() {
                     </Button>
                   </div>
                 </div>
-                <div ref={previewRef} className={styles.previewContainer} />
+                <div ref={previewRef} className={`${styles.previewContainer} ${darkPreview ? styles.dark : ''}`} />
               </>
             ) : (
               <div className={styles.previewEmpty}>

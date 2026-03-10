@@ -131,6 +131,16 @@
   margin-bottom: 8px;
 }
 
+.previewContainer.dark {
+  background: #1a1a2e;
+  color: #e0e0e8;
+}
+
+.previewContainer.dark .highlight {
+  background: rgba(108, 92, 231, 0.3);
+  color: #c4b5fd;
+}
+
 .previewHeader {
   display: flex;
   align-items: center;

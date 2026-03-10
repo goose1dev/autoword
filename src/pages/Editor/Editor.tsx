@@ -19,6 +19,7 @@ export function Editor() {
 
   const settingsFont = useSettingsStore((s) => s.defaultFont);
   const settingsFontSize = useSettingsStore((s) => s.defaultFontSize);
+  const darkPreview = useSettingsStore((s) => s.darkPreview);
 
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [formatOptions, setFormatOptions] = useState<Partial<ExportOptions>>({
@@ -222,7 +223,7 @@ export function Editor() {
                 </span>
               </div>
               <div
-                className={styles.previewContainer}
+                className={`${styles.previewContainer} ${darkPreview ? styles.dark : ''}`}
                 dangerouslySetInnerHTML={{ __html: highlightedHtml }}
               />
             </GlassCard>
