@@ -59,7 +59,7 @@ export function Templates() {
 
   const userRequests = isAdmin
     ? templateRequests
-    : templateRequests.filter((r) => r.submittedBy === currentUser?.displayName);
+    : templateRequests.filter((r) => r.submittedByUid === currentUser?.id);
 
   const pendingCount = userRequests.filter((r) => r.status === 'pending').length;
 
@@ -82,7 +82,7 @@ export function Templates() {
   const handleSubmitRequest = async () => {
     if (!requestFile) return;
     setSubmitting(true);
-    await submitTemplateRequest(requestFile, currentUser?.displayName ?? 'Невідомий', requestDesc.trim());
+    await submitTemplateRequest(requestFile, currentUser?.displayName ?? 'Невідомий', requestDesc.trim(), currentUser?.id ?? '');
     setSubmitting(false);
     setRequestFile(null);
     setRequestDesc('');

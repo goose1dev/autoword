@@ -51,6 +51,7 @@ export interface TemplateRequest {
   name: string;
   description: string;
   submittedBy: string;
+  submittedByUid: string;
   fileName: string;
   fileSize: number;
   submittedAt: Date;

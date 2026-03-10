@@ -1,4 +1,15 @@
 import { create } from 'zustand';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  onSnapshot,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase.ts';
 import type { DocumentTemplate, DocumentInstance, TemplateRequest } from '@/types/index.ts';
 import {
   convertDocxToHtml,
@@ -6,20 +17,40 @@ import {
   generateId,
 } from '@/services/documentService.ts';
 
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function base64ToFile(base64: string, fileName: string): File {
+  const [meta, data] = base64.split(',');
+  const mime = meta.match(/:(.*?);/)?.[1] ?? 'application/octet-stream';
+  const binary = atob(data);
+  const array = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+  return new File([array], fileName, { type: mime });
+}
+
 interface DocumentStore {
   templates: DocumentTemplate[];
   documents: DocumentInstance[];
   activeTemplateId: string | null;
   templateRequests: TemplateRequest[];
 
+  subscribeToFirestore: () => () => void;
+
   addTemplate: (file: File) => Promise<void>;
-  removeTemplate: (id: string) => void;
+  removeTemplate: (id: string) => Promise<void>;
   setActiveTemplate: (id: string | null) => void;
 
-  submitTemplateRequest: (file: File, submittedBy: string, description: string) => Promise<void>;
-  approveRequest: (id: string, comment?: string) => void;
-  rejectRequest: (id: string, comment: string) => void;
-  removeRequest: (id: string) => void;
+  submitTemplateRequest: (file: File, submittedBy: string, description: string, submittedByUid: string) => Promise<void>;
+  approveRequest: (id: string, comment?: string) => Promise<void>;
+  rejectRequest: (id: string, comment: string) => Promise<void>;
+  removeRequest: (id: string) => Promise<void>;
 
   addDocument: (templateId: string, name: string, values: Record<string, string>) => void;
   updateDocument: (id: string, values: Record<string, string>) => void;
@@ -34,30 +65,76 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   activeTemplateId: null,
   templateRequests: [],
 
+  subscribeToFirestore: () => {
+    const unsub1 = onSnapshot(collection(db, 'templates'), (snap) => {
+      const templates = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: data.name,
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          uploadedAt: data.uploadedAt?.toDate?.() ?? new Date(),
+          fields: data.fields ?? [],
+          rawFile: data.fileBase64
+            ? base64ToFile(data.fileBase64, data.fileName)
+            : new File([], data.fileName),
+          htmlPreview: data.htmlPreview ?? '',
+        } as DocumentTemplate;
+      });
+      set({ templates });
+    });
+
+    const unsub2 = onSnapshot(collection(db, 'templateRequests'), (snap) => {
+      const templateRequests = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          name: data.name,
+          description: data.description ?? '',
+          submittedBy: data.submittedBy,
+          submittedByUid: data.submittedByUid ?? '',
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          submittedAt: data.submittedAt?.toDate?.() ?? new Date(),
+          status: data.status,
+          reviewedAt: data.reviewedAt?.toDate?.(),
+          reviewComment: data.reviewComment,
+          fields: data.fields ?? [],
+          rawFile: data.fileBase64
+            ? base64ToFile(data.fileBase64, data.fileName)
+            : new File([], data.fileName),
+          htmlPreview: data.htmlPreview ?? '',
+        } as TemplateRequest;
+      });
+      set({ templateRequests });
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
+  },
+
   addTemplate: async (file: File) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
+    const fileBase64 = await fileToBase64(file);
 
-    const template: DocumentTemplate = {
-      id: generateId(),
+    await addDoc(collection(db, 'templates'), {
       name: file.name.replace(/\.docx$/i, ''),
       fileName: file.name,
       fileSize: file.size,
-      uploadedAt: new Date(),
+      uploadedAt: serverTimestamp(),
       fields,
-      rawFile: file,
+      fileBase64,
       htmlPreview,
-    };
-
-    set((state) => ({
-      templates: [...state.templates, template],
-      activeTemplateId: state.activeTemplateId ?? template.id,
-    }));
+    });
   },
 
-  removeTemplate: (id: string) => {
+  removeTemplate: async (id: string) => {
+    await deleteDoc(doc(db, 'templates', id));
     set((state) => ({
-      templates: state.templates.filter((t) => t.id !== id),
       documents: state.documents.filter((d) => d.templateId !== id),
       activeTemplateId: state.activeTemplateId === id ? null : state.activeTemplateId,
     }));
@@ -65,6 +142,60 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
 
   setActiveTemplate: (id: string | null) => {
     set({ activeTemplateId: id });
+  },
+
+  submitTemplateRequest: async (file: File, submittedBy: string, description: string, submittedByUid: string) => {
+    const htmlPreview = await convertDocxToHtml(file);
+    const fields = extractFields(htmlPreview);
+    const fileBase64 = await fileToBase64(file);
+
+    await addDoc(collection(db, 'templateRequests'), {
+      name: file.name.replace(/\.docx$/i, ''),
+      description,
+      submittedBy,
+      submittedByUid,
+      fileName: file.name,
+      fileSize: file.size,
+      submittedAt: serverTimestamp(),
+      status: 'pending',
+      fields,
+      fileBase64,
+      htmlPreview,
+    });
+  },
+
+  approveRequest: async (id: string, comment?: string) => {
+    const reqDoc = await getDoc(doc(db, 'templateRequests', id));
+    if (!reqDoc.exists()) return;
+    const reqData = reqDoc.data();
+
+    await addDoc(collection(db, 'templates'), {
+      name: reqData.name,
+      fileName: reqData.fileName,
+      fileSize: reqData.fileSize,
+      uploadedAt: serverTimestamp(),
+      fields: reqData.fields,
+      fileBase64: reqData.fileBase64,
+      htmlPreview: reqData.htmlPreview,
+    });
+
+    await updateDoc(doc(db, 'templateRequests', id), {
+      status: 'approved',
+      reviewedAt: serverTimestamp(),
+      reviewComment: comment ?? null,
+    });
+  },
+
+  rejectRequest: async (id: string, comment: string) => {
+    await updateDoc(doc(db, 'templateRequests', id), {
+      status: 'rejected',
+      reviewedAt: serverTimestamp(),
+      reviewComment: comment,
+    });
+  },
+
+  removeRequest: async (id: string) => {
+    await deleteDoc(doc(db, 'templateRequests', id));
   },
 
   addDocument: (templateId: string, name: string, values: Record<string, string>) => {
@@ -100,72 +231,6 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
           ? { ...d, fieldValues: { ...d.fieldValues, [fieldKey]: value }, updatedAt: new Date() }
           : d
       ),
-    }));
-  },
-
-  submitTemplateRequest: async (file: File, submittedBy: string, description: string) => {
-    const htmlPreview = await convertDocxToHtml(file);
-    const fields = extractFields(htmlPreview);
-
-    const request: TemplateRequest = {
-      id: generateId(),
-      name: file.name.replace(/\.docx$/i, ''),
-      description,
-      submittedBy,
-      fileName: file.name,
-      fileSize: file.size,
-      submittedAt: new Date(),
-      status: 'pending',
-      fields,
-      rawFile: file,
-      htmlPreview,
-    };
-
-    set((state) => ({
-      templateRequests: [...state.templateRequests, request],
-    }));
-  },
-
-  approveRequest: (id: string, comment?: string) => {
-    set((state) => {
-      const request = state.templateRequests.find((r) => r.id === id);
-      if (!request) return state;
-
-      const template: DocumentTemplate = {
-        id: generateId(),
-        name: request.name,
-        fileName: request.fileName,
-        fileSize: request.fileSize,
-        uploadedAt: new Date(),
-        fields: request.fields,
-        rawFile: request.rawFile,
-        htmlPreview: request.htmlPreview,
-      };
-
-      return {
-        templates: [...state.templates, template],
-        templateRequests: state.templateRequests.map((r) =>
-          r.id === id
-            ? { ...r, status: 'approved' as const, reviewedAt: new Date(), reviewComment: comment }
-            : r
-        ),
-      };
-    });
-  },
-
-  rejectRequest: (id: string, comment: string) => {
-    set((state) => ({
-      templateRequests: state.templateRequests.map((r) =>
-        r.id === id
-          ? { ...r, status: 'rejected' as const, reviewedAt: new Date(), reviewComment: comment }
-          : r
-      ),
-    }));
-  },
-
-  removeRequest: (id: string) => {
-    set((state) => ({
-      templateRequests: state.templateRequests.filter((r) => r.id !== id),
     }));
   },
 }));

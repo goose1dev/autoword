@@ -1,129 +1,154 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  getCountFromServer,
+  collection,
+} from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase.ts';
 import type { AppUser, UserRole } from '@/types/index.ts';
-
-interface StoredUser {
-  id: string;
-  username: string;
-  displayName: string;
-  role: UserRole;
-  passwordHash: string;
-  createdAt: string;
-}
 
 interface AuthStore {
   currentUser: AppUser | null;
-  users: StoredUser[];
-  initialized: boolean;
+  loading: boolean;
 
-  login: (username: string, password: string) => { ok: boolean; error?: string };
-  register: (username: string, displayName: string, password: string) => { ok: boolean; error?: string };
-  logout: () => void;
+  initAuth: () => () => void;
+  login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  register: (username: string, displayName: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isAdmin: () => boolean;
 }
 
-function hashPassword(password: string): string {
-  // Simple hash for local-only app (no server, no network)
-  let hash = 0;
-  const str = password + '__autoword_salt_2026__';
-  for (let i = 0; i < str.length; i++) {
-    const chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return 'h_' + Math.abs(hash).toString(36);
+function toEmail(username: string): string {
+  return `${username.toLowerCase().trim()}@autoword.app`;
 }
 
-const ADMIN_USER: StoredUser = {
-  id: 'admin-001',
-  username: 'admin',
-  displayName: 'Адміністратор',
-  role: 'admin',
-  passwordHash: hashPassword('admin'),
-  createdAt: new Date().toISOString(),
-};
+export const useAuthStore = create<AuthStore>()((set, get) => ({
+  currentUser: null,
+  loading: true,
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set, get) => ({
-      currentUser: null,
-      users: [ADMIN_USER],
-      initialized: true,
-
-      login: (username: string, password: string) => {
-        const { users } = get();
-        const user = users.find(
-          (u) => u.username.toLowerCase() === username.toLowerCase().trim()
-        );
-        if (!user) {
-          return { ok: false, error: 'Користувача не знайдено' };
+  initAuth: () => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          set({
+            currentUser: {
+              id: firebaseUser.uid,
+              username: data.username,
+              displayName: data.displayName,
+              role: data.role as UserRole,
+              createdAt: data.createdAt,
+            },
+            loading: false,
+          });
+        } else {
+          set({ currentUser: null, loading: false });
         }
-        if (user.passwordHash !== hashPassword(password)) {
-          return { ok: false, error: 'Невірний пароль' };
-        }
-        const appUser: AppUser = {
-          id: user.id,
-          username: user.username,
-          displayName: user.displayName,
-          role: user.role,
-          createdAt: user.createdAt,
-        };
-        set({ currentUser: appUser });
-        return { ok: true };
-      },
+      } else {
+        set({ currentUser: null, loading: false });
+      }
+    });
+    return unsubscribe;
+  },
 
-      register: (username: string, displayName: string, password: string) => {
-        const { users } = get();
-        const trimmedUsername = username.toLowerCase().trim();
+  login: async (username: string, password: string) => {
+    try {
+      const email = toEmail(username);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
 
-        if (trimmedUsername.length < 3) {
-          return { ok: false, error: "Ім'я користувача має бути мін. 3 символи" };
-        }
-        if (password.length < 4) {
-          return { ok: false, error: 'Пароль має бути мін. 4 символи' };
-        }
-        if (users.some((u) => u.username.toLowerCase() === trimmedUsername)) {
-          return { ok: false, error: 'Це ім\'я вже зайнято' };
-        }
-
-        const newUser: StoredUser = {
-          id: crypto.randomUUID(),
-          username: trimmedUsername,
-          displayName: displayName.trim() || trimmedUsername,
-          role: 'user',
-          passwordHash: hashPassword(password),
-          createdAt: new Date().toISOString(),
-        };
-
-        const appUser: AppUser = {
-          id: newUser.id,
-          username: newUser.username,
-          displayName: newUser.displayName,
-          role: newUser.role,
-          createdAt: newUser.createdAt,
-        };
-
+      const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
         set({
-          users: [...users, newUser],
-          currentUser: appUser,
+          currentUser: {
+            id: cred.user.uid,
+            username: data.username,
+            displayName: data.displayName,
+            role: data.role as UserRole,
+            createdAt: data.createdAt,
+          },
         });
-        return { ok: true };
-      },
-
-      logout: () => {
-        set({ currentUser: null });
-      },
-
-      isAdmin: () => {
-        return get().currentUser?.role === 'admin';
-      },
-    }),
-    {
-      name: 'autoword-auth',
-      partialize: (state) => ({
-        users: state.users,
-        currentUser: state.currentUser,
-      }),
+      }
+      return { ok: true };
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        return { ok: false, error: 'Користувача не знайдено або невірний пароль' };
+      }
+      if (code === 'auth/wrong-password') {
+        return { ok: false, error: 'Невірний пароль' };
+      }
+      return { ok: false, error: 'Помилка входу' };
     }
-  )
-);
+  },
+
+  register: async (username: string, displayName: string, password: string) => {
+    try {
+      const trimmedUsername = username.toLowerCase().trim();
+
+      if (trimmedUsername.length < 3) {
+        return { ok: false, error: "Ім'я користувача має бути мін. 3 символи" };
+      }
+      if (password.length < 6) {
+        return { ok: false, error: 'Пароль має бути мін. 6 символів' };
+      }
+
+      const email = toEmail(trimmedUsername);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      // First registered user becomes admin
+      const snapshot = await getCountFromServer(collection(db, 'users'));
+      const isFirst = snapshot.data().count === 0;
+
+      const role: UserRole = isFirst ? 'admin' : 'user';
+      const userDisplayName = displayName.trim() || trimmedUsername;
+      const createdAt = new Date().toISOString();
+
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        username: trimmedUsername,
+        displayName: userDisplayName,
+        role,
+        createdAt,
+      });
+
+      set({
+        currentUser: {
+          id: cred.user.uid,
+          username: trimmedUsername,
+          displayName: userDisplayName,
+          role,
+          createdAt,
+        },
+      });
+
+      return { ok: true };
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'auth/email-already-in-use') {
+        return { ok: false, error: "Це ім'я вже зайнято" };
+      }
+      if (code === 'auth/weak-password') {
+        return { ok: false, error: 'Пароль занадто слабкий (мін. 6 символів)' };
+      }
+      return { ok: false, error: 'Помилка реєстрації' };
+    }
+  },
+
+  logout: async () => {
+    await signOut(auth);
+    set({ currentUser: null });
+  },
+
+  isAdmin: () => {
+    return get().currentUser?.role === 'admin';
+  },
+}));

@@ -17,25 +17,31 @@ export function Auth() {
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
-    if (mode === 'login') {
-      const result = login(username, password);
-      if (result.ok) {
-        navigate('/', { replace: true });
+    try {
+      if (mode === 'login') {
+        const result = await login(username, password);
+        if (result.ok) {
+          navigate('/', { replace: true });
+        } else {
+          setError(result.error ?? 'Помилка входу');
+        }
       } else {
-        setError(result.error ?? 'Помилка входу');
+        const result = await register(username, displayName, password);
+        if (result.ok) {
+          navigate('/', { replace: true });
+        } else {
+          setError(result.error ?? 'Помилка реєстрації');
+        }
       }
-    } else {
-      const result = register(username, displayName, password);
-      if (result.ok) {
-        navigate('/', { replace: true });
-      } else {
-        setError(result.error ?? 'Помилка реєстрації');
-      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -103,8 +109,9 @@ export function Auth() {
             type="submit"
             icon={mode === 'login' ? <LogIn size={18} /> : <UserPlus size={18} />}
             className={styles.submitBtn}
+            disabled={submitting}
           >
-            {mode === 'login' ? 'Увійти' : 'Зареєструватися'}
+            {submitting ? 'Зачекайте...' : (mode === 'login' ? 'Увійти' : 'Зареєструватися')}
           </Button>
         </form>
 
