@@ -1,0 +1,540 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  height: calc(100vh - var(--header-height) - var(--space-16));
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.topActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ── 2-column layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--space-5);
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ── File List ── */
+.fileListPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fileListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.fileListTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fileCount {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  background: var(--color-surface);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  flex: 1;
+  margin-bottom: var(--space-3);
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.fileItem:hover {
+  background: var(--color-surface-hover);
+}
+
+.fileItem.active {
+  background: var(--color-primary-soft);
+  border-color: rgba(108, 92, 231, 0.3);
+}
+
+.fileItem.modified .fileName {
+  color: var(--color-accent);
+}
+
+.fileIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--color-primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.fileItem.modified .fileIcon {
+  background: rgba(0, 206, 201, 0.12);
+  color: var(--color-accent);
+}
+
+.fileName {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.fileMeta {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+}
+
+.deleteBtn {
+  padding: 3px;
+  border-radius: 4px;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.fileItem:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: var(--color-danger);
+  background: rgba(225, 112, 85, 0.1);
+}
+
+/* ── Document Area ── */
+.docArea {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+
+/* ── Floating Find & Replace bar ── */
+.findBar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  background: rgba(20, 20, 40, 0.92);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  padding: var(--space-4);
+  width: 360px;
+}
+
+.findBar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.findBarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.findBarTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.findBarClose {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.findBarClose:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.findBarFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.findBarRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.findBarInput {
+  flex: 1;
+  height: 34px;
+  padding: 0 var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-glass-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+}
+
+.findBarInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.findBarInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-soft);
+}
+
+.findBarBtn {
+  height: 34px;
+  padding: 0 var(--space-3);
+  border-radius: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.findBarBtnPrimary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--color-primary-glow);
+}
+
+.findBarBtnPrimary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--color-primary-glow);
+}
+
+.findBarBtnPrimary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.findBarInfo {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.findBarInfoHighlight {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* ── docx-preview Container ── */
+.previewContainer {
+  flex: 1;
+  overflow: auto;
+  background: #d4d4d4;
+  border-radius: var(--radius-md);
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Override docx-preview wrapper — the scrollable area */
+.previewContainer :global(.docx-wrapper) {
+  background: #d4d4d4 !important;
+  padding: clamp(16px, 3vw, 40px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Each rendered page — white "paper" with shadow */
+.previewContainer :global(.docx-wrapper > section.docx) {
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.08),
+    0 4px 16px rgba(0,0,0,0.15),
+    0 12px 48px rgba(0,0,0,0.12) !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Contain images within the page width */
+.previewContainer :global(.docx) img {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Contain tables */
+.previewContainer :global(.docx) table {
+  max-width: 100% !important;
+  table-layout: fixed !important;
+  word-wrap: break-word !important;
+  overflow: hidden !important;
+}
+
+/* Contain any absolutely positioned children */
+.previewContainer :global(.docx) * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.previewEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-glass-border);
+  color: var(--color-text-tertiary);
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+}
+
+/* ── Toolbar above doc ── */
+.docToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  flex-shrink: 0;
+}
+
+.docToolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.docFileName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.docToolbarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── Change log toast ── */
+.changeToast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  background: rgba(20, 20, 40, 0.92);
+  border: 1px solid rgba(0, 184, 148, 0.3);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(20px);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 280px;
+}
+
+.changeToastIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 184, 148, 0.15);
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.changeToastText {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.changeToastDetail {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+  color: var(--color-text-tertiary);
+}
+
+.emptyIcon {
+  margin-bottom: var(--space-4);
+  opacity: 0.2;
+}
+
+.emptyTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.emptyDesc {
+  font-size: var(--font-size-sm);
+  max-width: 400px;
+  margin: 0 auto var(--space-6);
+  line-height: 1.6;
+}
+
+/* ── Stats bar ── */
+.statsBar {
+  display: flex;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statValue {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .findBar {
+    width: 320px;
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    height: auto;
+    min-height: calc(100vh - var(--header-height) - var(--space-16));
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fileListPanel {
+    max-height: 200px;
+  }
+
+  .fileList {
+    max-height: 140px;
+  }
+
+  .findBar {
+    width: calc(100% - 24px);
+    right: 12px;
+    left: 12px;
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .topActions {
+    width: 100%;
+  }
+
+  .topActions > * {
+    flex: 1;
+  }
+
+  .statsBar {
+    gap: var(--space-2);
+  }
+
+  .emptyState {
+    padding: var(--space-8) var(--space-4);
+  }
+}
