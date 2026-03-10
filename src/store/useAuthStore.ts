@@ -106,8 +106,13 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
       const cred = await createUserWithEmailAndPassword(auth, email, password);
 
       // First registered user becomes admin
-      const snapshot = await getCountFromServer(collection(db, 'users'));
-      const isFirst = snapshot.data().count === 0;
+      let isFirst = false;
+      try {
+        const snapshot = await getCountFromServer(collection(db, 'users'));
+        isFirst = snapshot.data().count === 0;
+      } catch {
+        isFirst = true;
+      }
 
       const role: UserRole = isFirst ? 'admin' : 'user';
       const userDisplayName = displayName.trim() || trimmedUsername;
