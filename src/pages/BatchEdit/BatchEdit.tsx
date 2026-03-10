@@ -223,9 +223,6 @@ export function BatchEdit() {
       <>
         <Header title="Масове редагування" breadcrumb="Знайти та замінити у багатьох файлах" />
         <div className={styles.page}>
-          <div className={styles.topBar}>
-            <h2 className={styles.title}>Масове редагування</h2>
-          </div>
           <GlassCard padding="lg">
             <div className={styles.emptyState}>
               <Layers size={56} className={styles.emptyIcon} />
@@ -249,7 +246,6 @@ export function BatchEdit() {
       <div className={styles.page}>
         <div className={styles.topBar}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <h2 className={styles.title}>Масове редагування</h2>
             <div className={styles.statsBar}>
               <div className={styles.stat}>
                 <span className={styles.statValue}>{files.length}</span>
