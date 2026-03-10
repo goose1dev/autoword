@@ -8,6 +8,7 @@ import {
 import { GlassCard, Button, Badge, FileDropZone, Modal, Input } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
 import { useDocumentStore } from '@/store/useDocumentStore.ts';
+import { useSettingsStore } from '@/store/useSettingsStore.ts';
 import { useAuthStore } from '@/store/useAuthStore.ts';
 import type { TemplateRequestStatus } from '@/types/index.ts';
 import styles from './Templates.module.css';
@@ -34,6 +35,7 @@ export function Templates() {
   const approveRequest = useDocumentStore((s) => s.approveRequest);
   const rejectRequest = useDocumentStore((s) => s.rejectRequest);
   const removeRequest = useDocumentStore((s) => s.removeRequest);
+  const darkPreview = useSettingsStore((s) => s.darkPreview);
 
   const [activeTab, setActiveTab] = useState<TabId>('templates');
   const [showUpload, setShowUpload] = useState(false);
@@ -411,7 +413,9 @@ export function Templates() {
         {previewTemplate && (
           <div
             style={{
-              background: '#fff', color: '#000', padding: '24px',
+              background: darkPreview ? '#1a1a2e' : '#fff',
+              color: darkPreview ? '#e0e0e8' : '#000',
+              padding: '24px',
               borderRadius: 'var(--radius-md)', maxHeight: '60vh',
               overflow: 'auto', fontSize: '14px', lineHeight: '1.6',
             }}
@@ -442,7 +446,9 @@ export function Templates() {
             )}
             <div
               style={{
-                background: '#fff', color: '#000', padding: '24px',
+                background: darkPreview ? '#1a1a2e' : '#fff',
+                color: darkPreview ? '#e0e0e8' : '#000',
+                padding: '24px',
                 borderRadius: 'var(--radius-md)', maxHeight: '50vh',
                 overflow: 'auto', fontSize: '14px', lineHeight: '1.6',
               }}
