@@ -87,8 +87,21 @@
     border-bottom: none;
   }
 
+  .modal::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 1;
+  }
+
   .header {
-    padding: var(--space-4) var(--space-4) var(--space-3);
+    padding: 20px var(--space-4) var(--space-3);
   }
 
   .title {

@@ -322,6 +322,11 @@
 
   .topBarActions {
     width: 100%;
+    flex-direction: column;
+  }
+
+  .topBarActions > * {
+    width: 100%;
   }
 
   .filterBar {

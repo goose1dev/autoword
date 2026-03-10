@@ -184,7 +184,7 @@
 .version {
   text-align: center;
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin-top: var(--space-4);
 }
 
@@ -248,7 +248,7 @@
   .mobileBarNav {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     width: 100%;
     justify-content: space-between;
   }

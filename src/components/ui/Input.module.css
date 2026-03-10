@@ -57,6 +57,16 @@
   align-items: center;
 }
 
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 .textarea {
   min-height: 100px;
   padding: var(--space-3) var(--space-4);

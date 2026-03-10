@@ -102,6 +102,7 @@
   align-items: center;
   gap: var(--space-4);
   cursor: pointer;
+  min-width: 0;
 }
 
 .actionIcon {
@@ -119,12 +120,15 @@
 .actionTitle {
   font-size: var(--font-size-base);
   font-weight: 500;
+  min-width: 0;
 }
 
 .actionDesc {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin-top: 2px;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 /* ── Recent Templates ── */
@@ -208,7 +212,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .heroTitle {
     font-size: var(--font-size-2xl);
   }
@@ -218,16 +222,6 @@
   }
 
   .actionsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .heroTitle {
-    font-size: var(--font-size-xl);
-  }
-
-  .statsGrid {
     grid-template-columns: 1fr;
   }
 

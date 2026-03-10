@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  height: calc(100vh - var(--header-height) - var(--space-16));
+  height: calc(100dvh - var(--header-height) - var(--space-16));
 }
 
 .topBar {

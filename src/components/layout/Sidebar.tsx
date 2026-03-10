@@ -106,13 +106,6 @@ export function Sidebar() {
                 <Icon size={20} />
               </NavLink>
             ))}
-            <button
-              onClick={handleLogout}
-              className={styles.mobileNavItem}
-              title="Вийти"
-            >
-              <LogOut size={20} />
-            </button>
           </div>
         </div>
       </nav>
