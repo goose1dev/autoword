@@ -90,8 +90,14 @@
 @media (max-width: 768px) {
   .header {
     padding: 0 var(--space-4);
-    height: 52px;
+    height: auto;
     position: relative;
+    background: transparent;
+    border-bottom: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
   }
 
   .breadcrumb {
