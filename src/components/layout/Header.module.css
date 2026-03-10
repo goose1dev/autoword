@@ -77,23 +77,14 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .header {
-    padding: 0 var(--space-5);
+    padding: 0 var(--space-4);
+    height: 52px;
   }
 
   .breadcrumb {
     display: none;
-  }
-
-  .searchBox {
-    min-width: 140px;
-  }
-}
-
-@media (max-width: 600px) {
-  .header {
-    padding: 0 var(--space-3);
   }
 
   .searchBox {

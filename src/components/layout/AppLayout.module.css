@@ -34,10 +34,20 @@
 
 @media (max-width: 900px) {
   .main {
-    margin-left: 60px;
+    margin-left: 220px;
   }
 
   .content {
     padding: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+  }
+
+  .content {
+    padding: var(--space-4) var(--space-4) 100px;
   }
 }

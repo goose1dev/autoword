@@ -72,3 +72,35 @@
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-glass-border);
 }
+
+/* Mobile: bottom sheet style modal */
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+  }
+
+  .header {
+    padding: var(--space-4) var(--space-4) var(--space-3);
+  }
+
+  .title {
+    font-size: var(--font-size-base);
+  }
+
+  .body {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  .footer {
+    padding: var(--space-3) var(--space-4);
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  }
+}
