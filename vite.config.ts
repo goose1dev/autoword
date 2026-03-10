@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  base: '/lab16-voytovych/',
+  base: '/autoword/',
   plugins: [react()],
   resolve: {
     alias: {
