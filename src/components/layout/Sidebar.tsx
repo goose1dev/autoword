@@ -16,7 +16,7 @@ const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Головна' },
   { to: '/templates', icon: FileText, label: 'Шаблони' },
   { to: '/editor', icon: Zap, label: 'Редактор' },
-  { to: '/batch', icon: Layers, label: 'Пакетне' },
+  { to: '/batch', icon: Layers, label: 'Масове' },
   { to: '/settings', icon: Settings, label: 'Налаштування' },
 ];
 
