@@ -38,7 +38,7 @@
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  background: var(--color-glass-bg, rgba(255,255,255,0.04));
+  background: var(--color-glass);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-xl);
   backdrop-filter: blur(32px) saturate(1.5);

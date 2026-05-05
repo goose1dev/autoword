@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { LogOut, Moon, Sun } from 'lucide-react';
 import { GlassCard, Input } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
-import { useSettingsStore } from '@/store/useSettingsStore.ts';
+import { useSettingsStore, type ThemeMode } from '@/store/useSettingsStore.ts';
 import { useAuthStore } from '@/store/useAuthStore.ts';
 import styles from './Settings.module.css';
 
@@ -48,6 +48,44 @@ function ToggleRow({ label, desc, value, onChange }: ToggleRowProps) {
   );
 }
 
+interface ThemeRowProps {
+  value: ThemeMode;
+  onChange: (theme: ThemeMode) => void;
+}
+
+function ThemeRow({ value, onChange }: ThemeRowProps) {
+  return (
+    <div className={styles.row}>
+      <div>
+        <div className={styles.rowLabel}>Тема інтерфейсу</div>
+        <div className={styles.rowDesc}>Світла або фіолетова темна тема</div>
+      </div>
+      <div className={styles.themeControl} role="radiogroup" aria-label="Тема інтерфейсу">
+        <button
+          type="button"
+          className={`${styles.themeOption} ${value === 'dark' ? styles.themeOptionActive : ''}`}
+          onClick={() => onChange('dark')}
+          aria-checked={value === 'dark'}
+          role="radio"
+        >
+          <Moon size={14} />
+          Темна
+        </button>
+        <button
+          type="button"
+          className={`${styles.themeOption} ${value === 'light' ? styles.themeOptionActive : ''}`}
+          onClick={() => onChange('light')}
+          aria-checked={value === 'light'}
+          role="radio"
+        >
+          <Sun size={14} />
+          Світла
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Settings() {
   const navigate = useNavigate();
   const isAdmin = useAuthStore((s) => s.isAdmin);
@@ -55,12 +93,14 @@ export function Settings() {
 
   const defaultFont = useSettingsStore((s) => s.defaultFont);
   const defaultFontSize = useSettingsStore((s) => s.defaultFontSize);
+  const theme = useSettingsStore((s) => s.theme);
   const autoSave = useSettingsStore((s) => s.autoSave);
   const showFieldHints = useSettingsStore((s) => s.showFieldHints);
   const darkPreview = useSettingsStore((s) => s.darkPreview);
 
   const setDefaultFont = useSettingsStore((s) => s.setDefaultFont);
   const setDefaultFontSize = useSettingsStore((s) => s.setDefaultFontSize);
+  const setTheme = useSettingsStore((s) => s.setTheme);
   const setAutoSave = useSettingsStore((s) => s.setAutoSave);
   const setShowFieldHints = useSettingsStore((s) => s.setShowFieldHints);
   const setDarkPreview = useSettingsStore((s) => s.setDarkPreview);
@@ -115,6 +155,7 @@ export function Settings() {
               value={showFieldHints}
               onChange={setShowFieldHints}
             />
+            <ThemeRow value={theme} onChange={setTheme} />
             <ToggleRow
               label="Темний перегляд"
               desc="Темний фон у попередньому перегляді"

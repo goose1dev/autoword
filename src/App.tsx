@@ -10,12 +10,18 @@ import { BatchEdit } from './pages/BatchEdit/BatchEdit.tsx';
 import { Settings } from './pages/Settings/Settings.tsx';
 import { useAuthStore } from './store/useAuthStore.ts';
 import { useDocumentStore } from './store/useDocumentStore.ts';
+import { useSettingsStore } from './store/useSettingsStore.ts';
 
 export function App() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const loading = useAuthStore((s) => s.loading);
   const initAuth = useAuthStore((s) => s.initAuth);
   const subscribeToFirestore = useDocumentStore((s) => s.subscribeToFirestore);
+  const theme = useSettingsStore((s) => s.theme);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     const unsubscribe = initAuth();
