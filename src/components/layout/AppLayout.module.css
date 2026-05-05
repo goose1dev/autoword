@@ -19,6 +19,8 @@
   box-shadow: var(--shadow-glass);
   backdrop-filter: blur(24px) saturate(1.35);
   -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  transform-origin: top right;
+  will-change: transform, opacity;
 }
 
 .themeButton {
