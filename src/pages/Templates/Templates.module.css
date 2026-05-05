@@ -245,7 +245,7 @@
 .formTextarea {
   width: 100%;
   padding: 10px 14px;
-  background: var(--color-surface);
+  background: var(--color-dropzone-bg);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-md);
   color: var(--color-text);
@@ -273,7 +273,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(108, 92, 231, 0.1);
+  background: var(--color-primary-soft);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);

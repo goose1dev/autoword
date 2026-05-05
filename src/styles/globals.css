@@ -37,6 +37,9 @@
   --color-panel-bg: rgba(20, 20, 40, 0.92);
   --color-panel-border-subtle: rgba(255, 255, 255, 0.08);
   --color-panel-item-bg: rgba(255, 255, 255, 0.015);
+  --color-modal-bg: rgba(20, 20, 40, 0.88);
+  --color-modal-overlay: rgba(0, 0, 0, 0.52);
+  --color-modal-highlight-gradient: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%);
   --color-toast-bg: rgba(20, 20, 40, 0.92);
   --app-background-image:
     radial-gradient(ellipse 80% 60% at 10% 20%, rgba(108, 92, 231, 0.08) 0%, transparent 70%),
@@ -134,6 +137,9 @@
   --color-panel-bg: rgba(255, 255, 255, 0.96);
   --color-panel-border-subtle: rgba(38, 48, 76, 0.13);
   --color-panel-item-bg: rgba(65, 77, 110, 0.04);
+  --color-modal-bg: #fff;
+  --color-modal-overlay: rgba(23, 27, 38, 0.38);
+  --color-modal-highlight-gradient: linear-gradient(135deg, rgba(255,255,255,0.72) 0%, transparent 42%);
   --color-toast-bg: rgba(255, 255, 255, 0.97);
   --shadow-glass: 0 1px 2px rgba(42, 52, 80, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.98);
   --shadow-glass-lg: 0 5px 14px rgba(42, 52, 80, 0.08), 0 1px 3px rgba(42, 52, 80, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.98);
