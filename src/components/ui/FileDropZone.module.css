@@ -6,7 +6,7 @@
   padding: var(--space-8) var(--space-6);
   border: 2px dashed var(--color-glass-border);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-dropzone-bg);
   cursor: pointer;
   transition: all var(--transition-base);
   text-align: center;
@@ -16,7 +16,7 @@
 
 .container:hover {
   border-color: var(--color-primary);
-  background: var(--color-primary-soft);
+  background: var(--color-dropzone-hover-bg);
 }
 
 .container.dragging {

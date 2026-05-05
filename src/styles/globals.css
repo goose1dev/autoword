@@ -31,6 +31,12 @@
     transparent 50%,
     rgba(255, 255, 255, 0.02) 100%
   );
+  --color-dropzone-bg: var(--color-surface);
+  --color-dropzone-hover-bg: var(--color-primary-soft);
+  --color-panel-bg: rgba(20, 20, 40, 0.92);
+  --color-panel-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-panel-item-bg: rgba(255, 255, 255, 0.015);
+  --color-toast-bg: rgba(20, 20, 40, 0.92);
   --app-background-image:
     radial-gradient(ellipse 80% 60% at 10% 20%, rgba(108, 92, 231, 0.08) 0%, transparent 70%),
     radial-gradient(ellipse 60% 50% at 90% 80%, rgba(0, 206, 201, 0.06) 0%, transparent 70%),
@@ -90,15 +96,15 @@
 }
 
 :root[data-theme='light'] {
-  --color-bg: #f6f7fb;
-  --color-bg-gradient-start: #f8f9fd;
-  --color-bg-gradient-end: #edf1f8;
-  --color-surface: rgba(20, 26, 45, 0.04);
-  --color-surface-hover: rgba(20, 26, 45, 0.07);
-  --color-surface-active: rgba(20, 26, 45, 0.10);
-  --color-glass: rgba(255, 255, 255, 0.78);
-  --color-glass-border: rgba(42, 52, 80, 0.12);
-  --color-glass-highlight: rgba(108, 92, 231, 0.30);
+  --color-bg: #f2f5fa;
+  --color-bg-gradient-start: #fbfcff;
+  --color-bg-gradient-end: #e8eef7;
+  --color-surface: rgba(65, 77, 110, 0.065);
+  --color-surface-hover: rgba(65, 77, 110, 0.095);
+  --color-surface-active: rgba(65, 77, 110, 0.13);
+  --color-glass: rgba(255, 255, 255, 0.94);
+  --color-glass-border: rgba(38, 48, 76, 0.14);
+  --color-glass-highlight: rgba(91, 77, 230, 0.34);
   --color-primary: #5b4de6;
   --color-primary-glow: rgba(91, 77, 230, 0.20);
   --color-primary-soft: rgba(91, 77, 230, 0.12);
@@ -108,10 +114,10 @@
   --color-warning: #b06b00;
   --color-danger: #c94f39;
   --color-text: #17172a;
-  --color-text-secondary: rgba(23, 23, 42, 0.62);
-  --color-text-tertiary: rgba(23, 23, 42, 0.42);
-  --color-sidebar-bg: rgba(255, 255, 255, 0.82);
-  --color-mobile-bar-bg: rgba(255, 255, 255, 0.86);
+  --color-text-secondary: rgba(23, 23, 42, 0.68);
+  --color-text-tertiary: rgba(23, 23, 42, 0.48);
+  --color-sidebar-bg: rgba(255, 255, 255, 0.94);
+  --color-mobile-bar-bg: rgba(255, 255, 255, 0.94);
   --color-mobile-search-overlay: rgba(255, 255, 255, 0.96);
   --color-user-card-bg: rgba(91, 77, 230, 0.06);
   --color-select-option-bg: #fff;
@@ -121,16 +127,22 @@
     transparent 52%,
     rgba(91, 77, 230, 0.06) 100%
   );
-  --shadow-glass: 0 12px 36px rgba(50, 59, 95, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  --shadow-glass-lg: 0 20px 64px rgba(50, 59, 95, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --color-dropzone-bg: rgba(246, 248, 252, 0.86);
+  --color-dropzone-hover-bg: rgba(91, 77, 230, 0.08);
+  --color-panel-bg: rgba(255, 255, 255, 0.96);
+  --color-panel-border-subtle: rgba(38, 48, 76, 0.13);
+  --color-panel-item-bg: rgba(65, 77, 110, 0.04);
+  --color-toast-bg: rgba(255, 255, 255, 0.97);
+  --shadow-glass: 0 14px 34px rgba(42, 52, 80, 0.12), 0 2px 8px rgba(42, 52, 80, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  --shadow-glass-lg: 0 24px 70px rgba(42, 52, 80, 0.18), 0 4px 16px rgba(42, 52, 80, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
   --app-background-image:
-    radial-gradient(ellipse 70% 50% at 12% 18%, rgba(91, 77, 230, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 45% at 90% 82%, rgba(0, 155, 154, 0.07) 0%, transparent 72%),
+    radial-gradient(ellipse 55% 42% at 12% 14%, rgba(91, 77, 230, 0.10) 0%, transparent 68%),
+    radial-gradient(ellipse 48% 42% at 92% 88%, rgba(0, 155, 154, 0.08) 0%, transparent 72%),
     linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
   --app-mesh-background:
-    radial-gradient(circle at 20% 50%, rgba(91, 77, 230, 0.045) 0%, transparent 50%),
-    radial-gradient(circle at 78% 22%, rgba(0, 155, 154, 0.04) 0%, transparent 50%);
-  --app-mesh-opacity: 0.78;
+    radial-gradient(circle at 20% 48%, rgba(91, 77, 230, 0.035) 0%, transparent 48%),
+    radial-gradient(circle at 78% 22%, rgba(0, 155, 154, 0.032) 0%, transparent 48%);
+  --app-mesh-opacity: 0.55;
 
   color-scheme: light;
 }

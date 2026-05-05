@@ -13,6 +13,7 @@
   border-right: 1px solid var(--color-glass-border);
   backdrop-filter: blur(32px) saturate(1.5);
   -webkit-backdrop-filter: blur(32px) saturate(1.5);
+  box-shadow: 10px 0 34px rgba(42, 52, 80, 0.08);
   z-index: 100;
   padding: var(--space-6) 0;
 }
@@ -232,7 +233,7 @@
     gap: 4px;
     padding: 6px 8px;
     background: var(--color-mobile-bar-bg);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--color-glass-border);
     border-radius: 22px;
     backdrop-filter: blur(40px) saturate(1.8);
     -webkit-backdrop-filter: blur(40px) saturate(1.8);

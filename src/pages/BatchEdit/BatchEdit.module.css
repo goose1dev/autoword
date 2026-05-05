@@ -33,7 +33,7 @@
   padding: 10px 12px;
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-panel-item-bg);
 }
 
 .historyItem {
@@ -201,12 +201,12 @@
   top: 12px;
   right: 12px;
   z-index: 20;
-  background: rgba(20, 20, 40, 0.92);
+  background: var(--color-panel-bg);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-md);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-glass-lg);
   padding: var(--space-4);
   width: 420px;
   max-height: calc(100% - 24px);
@@ -290,7 +290,7 @@
   height: 30px;
   border-radius: 8px;
   border: 1px solid var(--color-glass-border);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-panel-item-bg);
   color: var(--color-text-secondary);
   font-size: 11px;
   font-weight: 500;
@@ -310,12 +310,12 @@
 .scopeBtnActive {
   background: var(--color-primary-soft);
   border-color: rgba(108, 92, 231, 0.45);
-  color: #fff;
+  color: var(--color-primary);
 }
 
 .quickIdeas {
   margin-top: var(--space-3);
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  border-top: 1px dashed var(--color-panel-border-subtle);
   padding-top: var(--space-3);
 }
 
@@ -348,7 +348,7 @@
 
 .quickIdeaBtn:hover {
   border-color: rgba(108, 92, 231, 0.45);
-  color: #fff;
+  color: var(--color-primary);
   background: rgba(108, 92, 231, 0.18);
 }
 
@@ -426,7 +426,7 @@
 .impactPanel {
   margin-top: var(--space-3);
   padding-top: var(--space-3);
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  border-top: 1px dashed var(--color-panel-border-subtle);
 }
 
 .impactPanelHeader {
@@ -467,10 +467,10 @@
 }
 
 .impactItem {
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--color-panel-border-subtle);
   border-radius: 8px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.015);
+  background: var(--color-panel-item-bg);
 }
 
 .impactItemTop {
@@ -494,7 +494,7 @@
   height: 18px;
   border-radius: 999px;
   background: var(--color-primary-soft);
-  color: #fff;
+  color: var(--color-primary);
   font-size: 10px;
   font-weight: 700;
   display: inline-flex;
@@ -512,7 +512,7 @@
 
 .snippet mark {
   background: rgba(108, 92, 231, 0.28);
-  color: #fff;
+  color: var(--color-text);
   border-radius: 3px;
   padding: 0 2px;
 }
@@ -588,7 +588,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.02);
+  background: var(--color-dropzone-bg);
   border-radius: var(--radius-md);
   border: 1px dashed var(--color-glass-border);
   color: var(--color-text-tertiary);
@@ -630,12 +630,12 @@
   bottom: 24px;
   right: 24px;
   z-index: 100;
-  background: rgba(20, 20, 40, 0.92);
+  background: var(--color-toast-bg);
   border: 1px solid rgba(0, 184, 148, 0.3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(20px);
   padding: var(--space-4) var(--space-5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-glass-lg);
   display: flex;
   align-items: center;
   gap: var(--space-3);
