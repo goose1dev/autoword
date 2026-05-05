@@ -25,10 +25,15 @@ export function AppLayout() {
             className={styles.themeDock}
             role="radiogroup"
             aria-label="Тема інтерфейсу"
-            initial={{ opacity: 0, y: -18, scale: 0.96, filter: 'blur(8px)' }}
+            initial={{ opacity: 0, y: -46, scale: 0.98, filter: 'blur(3px)' }}
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -34, scale: 0.94, filter: 'blur(8px)' }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, y: -58, scale: 0.98, filter: 'blur(3px)' }}
+            transition={{
+              y: { type: 'spring', stiffness: 170, damping: 26, mass: 0.9 },
+              opacity: { duration: 0.42, ease: 'easeInOut' },
+              scale: { duration: 0.42, ease: 'easeInOut' },
+              filter: { duration: 0.32, ease: 'easeInOut' },
+            }}
           >
             {themeOptions.map(({ value, label, icon: Icon }) => (
               <button
