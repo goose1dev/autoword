@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import { Sidebar } from './Sidebar.tsx';
 import { useSettingsStore, type ThemeMode } from '@/store/useSettingsStore.ts';
@@ -19,34 +18,28 @@ export function AppLayout() {
   return (
     <div className={styles.layout}>
       <Sidebar />
-      <AnimatePresence>
-        {showThemeDock && (
-          <motion.div
-            className={styles.themeDock}
-            role="radiogroup"
-            aria-label="Тема інтерфейсу"
-            initial={{ opacity: 0, y: -76, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -86, scale: 0.985 }}
-            transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+      <div
+        className={`${styles.themeDock} ${!showThemeDock ? styles.themeDockHidden : ''}`}
+        role="radiogroup"
+        aria-label="Тема інтерфейсу"
+        aria-hidden={!showThemeDock}
+      >
+        {themeOptions.map(({ value, label, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            className={`${styles.themeButton} ${theme === value ? styles.themeButtonActive : ''}`}
+            onClick={() => setTheme(value)}
+            aria-label={label}
+            aria-checked={theme === value}
+            role="radio"
+            tabIndex={showThemeDock ? 0 : -1}
+            title={label}
           >
-            {themeOptions.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                type="button"
-                className={`${styles.themeButton} ${theme === value ? styles.themeButtonActive : ''}`}
-                onClick={() => setTheme(value)}
-                aria-label={label}
-                aria-checked={theme === value}
-                role="radio"
-                title={label}
-              >
-                <Icon size={17} />
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <Icon size={17} />
+          </button>
+        ))}
+      </div>
       <main className={styles.main}>
         <div className={styles.content}>
           <Outlet />
