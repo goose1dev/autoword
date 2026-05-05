@@ -46,6 +46,7 @@ export function Templates() {
   const [requestFile, setRequestFile] = useState<File | null>(null);
   const [requestDesc, setRequestDesc] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Review modal state
   const [reviewId, setReviewId] = useState<string | null>(null);
@@ -84,11 +85,24 @@ export function Templates() {
   const handleSubmitRequest = async () => {
     if (!requestFile) return;
     setSubmitting(true);
-    await submitTemplateRequest(requestFile, currentUser?.displayName ?? 'Невідомий', requestDesc.trim(), currentUser?.id ?? '');
-    setSubmitting(false);
-    setRequestFile(null);
-    setRequestDesc('');
-    setShowSubmitRequest(false);
+    setSubmitError('');
+    try {
+      await submitTemplateRequest(requestFile, currentUser?.displayName ?? 'Невідомий', requestDesc.trim(), currentUser?.id ?? '');
+      setRequestFile(null);
+      setRequestDesc('');
+      setShowSubmitRequest(false);
+    } catch (err) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'permission-denied') {
+        setSubmitError('Немає прав для збереження запиту у Firebase.');
+      } else if (code === 'resource-exhausted' || code === 'invalid-argument') {
+        setSubmitError('Файл або превʼю завеликі для збереження. Спробуйте менший .docx файл.');
+      } else {
+        setSubmitError('Не вдалося зберегти запит. Перевірте підключення та спробуйте ще раз.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleApprove = () => {
@@ -461,11 +475,11 @@ export function Templates() {
       {/* ── Submit Request Modal ── */}
       <Modal
         open={showSubmitRequest}
-        onClose={() => { setShowSubmitRequest(false); setRequestFile(null); setRequestDesc(''); }}
+        onClose={() => { setShowSubmitRequest(false); setRequestFile(null); setRequestDesc(''); setSubmitError(''); }}
         title="Надіслати запит на шаблон"
         footer={
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <Button variant="secondary" onClick={() => { setShowSubmitRequest(false); setRequestFile(null); setRequestDesc(''); }}>
+            <Button variant="secondary" onClick={() => { setShowSubmitRequest(false); setRequestFile(null); setRequestDesc(''); setSubmitError(''); }}>
               Скасувати
             </Button>
             <Button
@@ -510,6 +524,11 @@ export function Templates() {
             />
           )}
         </div>
+        {submitError && (
+          <div className={styles.formError}>
+            {submitError}
+          </div>
+        )}
       </Modal>
 
       {/* ── Review Modal (approve / reject) ── */}

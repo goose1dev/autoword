@@ -267,6 +267,16 @@
   color: var(--color-text-tertiary);
 }
 
+.formError {
+  padding: 10px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.10);
+  color: #ef4444;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
 /* ── File chip ── */
 .fileChip {
   display: inline-flex;

@@ -147,7 +147,6 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   submitTemplateRequest: async (file: File, submittedBy: string, description: string, submittedByUid: string) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
-    const fileBase64 = await fileToBase64(file);
 
     await addDoc(collection(db, 'templateRequests'), {
       name: file.name.replace(/\.docx$/i, ''),
@@ -159,7 +158,6 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       submittedAt: serverTimestamp(),
       status: 'pending',
       fields,
-      fileBase64,
       htmlPreview,
     });
   },
@@ -169,15 +167,20 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
     if (!reqDoc.exists()) return;
     const reqData = reqDoc.data();
 
-    await addDoc(collection(db, 'templates'), {
+    const templatePayload: Record<string, unknown> = {
       name: reqData.name,
       fileName: reqData.fileName,
       fileSize: reqData.fileSize,
       uploadedAt: serverTimestamp(),
       fields: reqData.fields,
-      fileBase64: reqData.fileBase64,
       htmlPreview: reqData.htmlPreview,
-    });
+    };
+
+    if (reqData.fileBase64) {
+      templatePayload.fileBase64 = reqData.fileBase64;
+    }
+
+    await addDoc(collection(db, 'templates'), templatePayload);
 
     await updateDoc(doc(db, 'templateRequests', id), {
       status: 'approved',
