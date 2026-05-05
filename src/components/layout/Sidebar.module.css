@@ -66,6 +66,7 @@
   transition: all var(--transition-base);
   position: relative;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .navItem:hover {
