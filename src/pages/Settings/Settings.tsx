@@ -63,16 +63,6 @@ function ThemeRow({ value, onChange }: ThemeRowProps) {
       <div className={styles.themeControl} role="radiogroup" aria-label="Тема інтерфейсу">
         <button
           type="button"
-          className={`${styles.themeOption} ${value === 'dark' ? styles.themeOptionActive : ''}`}
-          onClick={() => onChange('dark')}
-          aria-checked={value === 'dark'}
-          role="radio"
-        >
-          <Moon size={14} />
-          Темна
-        </button>
-        <button
-          type="button"
           className={`${styles.themeOption} ${value === 'light' ? styles.themeOptionActive : ''}`}
           onClick={() => onChange('light')}
           aria-checked={value === 'light'}
@@ -80,6 +70,16 @@ function ThemeRow({ value, onChange }: ThemeRowProps) {
         >
           <Sun size={14} />
           Світла
+        </button>
+        <button
+          type="button"
+          className={`${styles.themeOption} ${value === 'dark' ? styles.themeOptionActive : ''}`}
+          onClick={() => onChange('dark')}
+          aria-checked={value === 'dark'}
+          role="radio"
+        >
+          <Moon size={14} />
+          Темна
         </button>
       </div>
     </div>
