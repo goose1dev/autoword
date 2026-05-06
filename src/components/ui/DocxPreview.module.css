@@ -58,7 +58,8 @@
 }
 
 .fallbackPaper {
-  width: min(794px, 100%);
+  width: 794px;
+  max-width: 100%;
   min-height: 1123px;
   margin: clamp(18px, 3vw, 44px) auto;
   padding: 96px 76px;
@@ -73,9 +74,36 @@
   line-height: 1.5;
 }
 
+.fallbackPaper p {
+  margin: 0 0 10pt;
+}
+
+.fallbackPaper h1,
+.fallbackPaper h2,
+.fallbackPaper h3,
+.fallbackPaper h4,
+.fallbackPaper h5,
+.fallbackPaper h6 {
+  margin: 0 0 12pt;
+  line-height: 1.25;
+}
+
+.fallbackPaper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12pt 0;
+}
+
+.fallbackPaper td,
+.fallbackPaper th {
+  padding: 4pt 6pt;
+  vertical-align: top;
+}
+
 .fallbackPaper img {
   max-width: 100%;
   height: auto;
+  object-fit: contain;
 }
 
 .dark .fallbackPaper {

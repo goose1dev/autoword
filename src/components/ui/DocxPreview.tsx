@@ -60,7 +60,7 @@ export function DocxPreview({
             : null;
 
         if (!sourceFile) {
-          renderFallback('Оригінальний .docx файл недоступний, тому показано спрощений HTML-перегляд.');
+          renderFallback('Для цього старого запису немає оригінального .docx файлу. Щоб отримати точний Word-перегляд, перезавантажте файл або надішліть запит заново.');
           return;
         }
 
