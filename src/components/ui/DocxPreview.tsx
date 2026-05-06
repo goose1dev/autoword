@@ -26,6 +26,50 @@ async function loadFileFromUrl(url: string, fileName: string): Promise<File> {
   });
 }
 
+function createFallbackPage(root: HTMLDivElement): HTMLDivElement {
+  const paper = document.createElement('div');
+  paper.className = styles.fallbackPaper;
+
+  const content = document.createElement('div');
+  content.className = styles.fallbackContent;
+
+  paper.appendChild(content);
+  root.appendChild(paper);
+  return content;
+}
+
+function renderPagedFallback(container: HTMLDivElement, html: string) {
+  container.innerHTML = '';
+
+  const pagesRoot = document.createElement('div');
+  pagesRoot.className = styles.fallbackPages;
+
+  const source = document.createElement('div');
+  source.className = styles.fallbackSource;
+  source.innerHTML = html;
+
+  container.appendChild(pagesRoot);
+  container.appendChild(source);
+
+  let currentPage = createFallbackPage(pagesRoot);
+  const nodes = Array.from(source.childNodes).filter((node) => {
+    return node.nodeType !== Node.TEXT_NODE || node.textContent?.trim();
+  });
+
+  for (const node of nodes) {
+    currentPage.appendChild(node);
+
+    const overflows = currentPage.scrollHeight > currentPage.clientHeight + 2;
+    if (overflows && currentPage.childNodes.length > 1) {
+      currentPage.removeChild(node);
+      currentPage = createFallbackPage(pagesRoot);
+      currentPage.appendChild(node);
+    }
+  }
+
+  source.remove();
+}
+
 export function DocxPreview({
   file,
   fileUrl,
@@ -47,7 +91,7 @@ export function DocxPreview({
 
     const renderFallback = (text: string) => {
       if (!htmlFallback) return;
-      container.innerHTML = `<div class="${styles.fallbackPaper}">${htmlFallback}</div>`;
+      renderPagedFallback(container, htmlFallback);
       setMessage(text);
     };
 
