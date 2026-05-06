@@ -19,6 +19,18 @@ import {
 import { storage } from '@/lib/firebase.ts';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
+const FIRESTORE_FILE_BACKUP_LIMIT = 450 * 1024;
+const STORAGE_UPLOAD_TIMEOUT_MS = 12000;
+
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function base64ToFile(base64: string, fileName: string): File {
   const [meta, data] = base64.split(',');
   const mime = meta.match(/:(.*?);/)?.[1] ?? 'application/octet-stream';
@@ -28,15 +40,50 @@ function base64ToFile(base64: string, fileName: string): File {
   return new File([array], fileName, { type: mime });
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  });
+}
+
 async function uploadDocxFile(folder: string, file: File): Promise<{ fileUrl: string; storagePath: string }> {
   const safeName = file.name.replace(/[^\w.\-()[\] ]+/g, '_');
   const storagePath = `${folder}/${crypto.randomUUID()}-${safeName}`;
   const fileRef = ref(storage, storagePath);
-  await uploadBytes(fileRef, file, {
-    contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  });
-  const fileUrl = await getDownloadURL(fileRef);
+  await withTimeout(
+    uploadBytes(fileRef, file, {
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    }),
+    STORAGE_UPLOAD_TIMEOUT_MS,
+    'storage-upload-timeout',
+  );
+  const fileUrl = await withTimeout(getDownloadURL(fileRef), STORAGE_UPLOAD_TIMEOUT_MS, 'storage-url-timeout');
   return { fileUrl, storagePath };
+}
+
+async function buildFileStoragePayload(folder: string, file: File): Promise<Record<string, unknown>> {
+  const payload: Record<string, unknown> = {};
+  const canBackupInFirestore = file.size <= FIRESTORE_FILE_BACKUP_LIMIT;
+
+  if (canBackupInFirestore) {
+    payload.fileBase64 = await fileToBase64(file);
+  }
+
+  try {
+    Object.assign(payload, await uploadDocxFile(folder, file));
+  } catch (err) {
+    console.warn('Firebase Storage upload failed, using Firestore backup when possible.', err);
+    if (!canBackupInFirestore) {
+      throw err;
+    }
+  }
+
+  return payload;
 }
 
 interface DocumentStore {
@@ -127,7 +174,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   addTemplate: async (file: File) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
-    const uploaded = await uploadDocxFile('templates', file);
+    const filePayload = await buildFileStoragePayload('templates', file);
 
     await addDoc(collection(db, 'templates'), {
       name: file.name.replace(/\.docx$/i, ''),
@@ -135,7 +182,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       fileSize: file.size,
       uploadedAt: serverTimestamp(),
       fields,
-      ...uploaded,
+      ...filePayload,
       htmlPreview,
     });
   },
@@ -155,7 +202,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   submitTemplateRequest: async (file: File, submittedBy: string, description: string, submittedByUid: string) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
-    const uploaded = await uploadDocxFile('template-requests', file);
+    const filePayload = await buildFileStoragePayload('template-requests', file);
 
     await addDoc(collection(db, 'templateRequests'), {
       name: file.name.replace(/\.docx$/i, ''),
@@ -167,7 +214,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       submittedAt: serverTimestamp(),
       status: 'pending',
       fields,
-      ...uploaded,
+      ...filePayload,
       htmlPreview,
     });
   },
