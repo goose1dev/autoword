@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Download, Printer, Eye } from 'lucide-react';
+import { Download, Eye, FileText } from 'lucide-react';
+import { renderAsync } from 'docx-preview';
+import { saveAs } from 'file-saver';
 import { GlassCard, Button, Input } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
 import { useDocumentStore } from '@/store/useDocumentStore.ts';
 import { useSettingsStore } from '@/store/useSettingsStore.ts';
-import { fillTemplate } from '@/services/documentService.ts';
-import { exportToDocx, type ExportOptions } from '@/services/exportService.ts';
+import { fillDocxTemplate, fillTemplate } from '@/services/documentService.ts';
+import { exportToDocx } from '@/services/exportService.ts';
 import styles from './Editor.module.css';
 
 export function Editor() {
@@ -14,23 +16,14 @@ export function Editor() {
   const templates = useDocumentStore((s) => s.templates);
   const activeTemplateId = useDocumentStore((s) => s.activeTemplateId);
   const setActiveTemplate = useDocumentStore((s) => s.setActiveTemplate);
+  const darkPreview = useSettingsStore((s) => s.darkPreview);
 
   const activeTemplate = templates.find((t) => t.id === activeTemplateId);
 
-  const settingsFont = useSettingsStore((s) => s.defaultFont);
-  const settingsFontSize = useSettingsStore((s) => s.defaultFontSize);
-  const darkPreview = useSettingsStore((s) => s.darkPreview);
-
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
-  const [formatOptions, setFormatOptions] = useState<Partial<ExportOptions>>({
-    marginTop: 20,
-    marginBottom: 20,
-    marginLeft: 30,
-    marginRight: 15,
-    fontSize: settingsFontSize,
-    fontFamily: settingsFont,
-    lineSpacing: 1.5,
-  });
+  const [previewError, setPreviewError] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const previewHtml = useMemo(() => {
     if (!activeTemplate) return '';
@@ -41,43 +34,90 @@ export function Editor() {
     if (!previewHtml) return '';
     return previewHtml.replace(
       /\{\{([^}]+)\}\}/g,
-      `<span class="${styles.highlight}">{{$1}}</span>`
+      `<span class="${styles.highlight}">{{$1}}</span>`,
     );
   }, [previewHtml]);
+
+  useEffect(() => {
+    if (!activeTemplate && templates.length > 0) {
+      setActiveTemplate(templates[0].id);
+    }
+  }, [activeTemplate, setActiveTemplate, templates]);
+
+  useEffect(() => {
+    setFieldValues({});
+  }, [activeTemplateId]);
+
+  useEffect(() => {
+    const container = previewRef.current;
+    if (!container) return;
+
+    let cancelled = false;
+    setPreviewError('');
+    container.innerHTML = '';
+
+    if (!activeTemplate) return;
+
+    if (activeTemplate.rawFile.size === 0) {
+      container.innerHTML = `<div class="${styles.htmlFallback}">${highlightedHtml}</div>`;
+      setPreviewError('Оригінальний .docx файл недоступний, тому показано спрощений HTML-перегляд.');
+      return;
+    }
+
+    (async () => {
+      try {
+        const buffer = await fillDocxTemplate(activeTemplate.rawFile, fieldValues);
+        if (cancelled) return;
+
+        container.innerHTML = '';
+        await renderAsync(buffer, container, undefined, {
+          className: 'docx',
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: false,
+          ignoreFonts: false,
+          breakPages: true,
+          ignoreLastRenderedPageBreak: false,
+          renderHeaders: true,
+          renderFooters: true,
+          renderFootnotes: true,
+          renderEndnotes: true,
+        });
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          container.innerHTML = `<div class="${styles.htmlFallback}">${highlightedHtml}</div>`;
+          setPreviewError('Не вдалося показати Word-перегляд. Показано спрощену версію.');
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTemplate, fieldValues, highlightedHtml]);
 
   const handleFieldChange = (key: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleFormatChange = (key: keyof ExportOptions, value: number) => {
-    setFormatOptions((prev) => ({ ...prev, [key]: value }));
-  };
-
   const handleExport = async () => {
     if (!activeTemplate) return;
-    const filledContent = fillTemplate(activeTemplate.htmlPreview, fieldValues);
-    await exportToDocx(filledContent, activeTemplate.name, formatOptions);
-  };
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${activeTemplate?.name ?? 'Документ'}</title>
-          <style>
-            body { font-family: '${formatOptions.fontFamily ?? settingsFont}', serif; font-size: ${formatOptions.fontSize ?? settingsFontSize}pt; line-height: 1.6; padding: 40px; }
-            @page { margin: ${formatOptions.marginTop ?? 20}mm ${formatOptions.marginRight ?? 15}mm ${formatOptions.marginBottom ?? 20}mm ${formatOptions.marginLeft ?? 30}mm; }
-            .placeholder { background: #fef3c7; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
-          </style>
-        </head>
-        <body>${previewHtml}</body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+    setExporting(true);
+    try {
+      if (activeTemplate.rawFile.size > 0) {
+        const buffer = await fillDocxTemplate(activeTemplate.rawFile, fieldValues);
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+        saveAs(blob, activeTemplate.fileName || `${activeTemplate.name}.docx`);
+      } else {
+        await exportToDocx(previewHtml, activeTemplate.name);
+      }
+    } finally {
+      setExporting(false);
+    }
   };
 
   if (templates.length === 0) {
@@ -105,30 +145,21 @@ export function Editor() {
       <Header title="Редактор" breadcrumb={activeTemplate?.name} />
       <div className={styles.page}>
         <div className={styles.topBar}>
+          <div />
           <div className={styles.topActions}>
-            <Button
-              variant="secondary"
-              size="md"
-              icon={<Printer size={16} />}
-              onClick={handlePrint}
-              disabled={!activeTemplate}
-            >
-              Друк
-            </Button>
             <Button
               variant="primary"
               size="md"
               icon={<Download size={16} />}
               onClick={handleExport}
-              disabled={!activeTemplate}
+              disabled={!activeTemplate || exporting}
             >
-              Експорт .docx
+              {exporting ? 'Експорт...' : 'Експорт .docx'}
             </Button>
           </div>
         </div>
 
         <div className={styles.editorLayout}>
-          {/* ── Left: Fields ── */}
           <div className={styles.fieldsPanel}>
             <GlassCard padding="md">
               <div className={styles.fieldGroup}>
@@ -164,56 +195,8 @@ export function Editor() {
                 </div>
               </GlassCard>
             )}
-
-            <GlassCard padding="md">
-              <div className={styles.formatSection}>
-                <p className={styles.formatTitle}>Форматування</p>
-                <div className={styles.formatGrid}>
-                  <Input
-                    label="Верхній відступ (мм)"
-                    type="number"
-                    value={formatOptions.marginTop ?? 20}
-                    onChange={(e) => handleFormatChange('marginTop', Number(e.target.value))}
-                  />
-                  <Input
-                    label="Нижній відступ (мм)"
-                    type="number"
-                    value={formatOptions.marginBottom ?? 20}
-                    onChange={(e) => handleFormatChange('marginBottom', Number(e.target.value))}
-                  />
-                  <Input
-                    label="Лівий відступ (мм)"
-                    type="number"
-                    value={formatOptions.marginLeft ?? 30}
-                    onChange={(e) => handleFormatChange('marginLeft', Number(e.target.value))}
-                  />
-                  <Input
-                    label="Правий відступ (мм)"
-                    type="number"
-                    value={formatOptions.marginRight ?? 15}
-                    onChange={(e) => handleFormatChange('marginRight', Number(e.target.value))}
-                  />
-                </div>
-                <div className={styles.formatGrid}>
-                  <Input
-                    label="Розмір шрифту (пт)"
-                    type="number"
-                    value={formatOptions.fontSize ?? 14}
-                    onChange={(e) => handleFormatChange('fontSize', Number(e.target.value))}
-                  />
-                  <Input
-                    label="Міжрядковий інтервал"
-                    type="number"
-                    step="0.1"
-                    value={formatOptions.lineSpacing ?? 1.5}
-                    onChange={(e) => handleFormatChange('lineSpacing', Number(e.target.value))}
-                  />
-                </div>
-              </div>
-            </GlassCard>
           </div>
 
-          {/* ── Right: Preview ── */}
           <div className={styles.previewPanel}>
             <GlassCard padding="md">
               <div className={styles.previewHeader}>
@@ -223,9 +206,12 @@ export function Editor() {
                 </span>
               </div>
               <div
+                ref={previewRef}
                 className={`${styles.previewContainer} ${darkPreview ? styles.dark : ''}`}
-                dangerouslySetInnerHTML={{ __html: highlightedHtml }}
               />
+              {previewError && (
+                <div className={styles.previewError}>{previewError}</div>
+              )}
             </GlassCard>
           </div>
         </div>
