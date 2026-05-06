@@ -25,7 +25,7 @@
 }
 
 .modalXl {
-  max-width: min(1180px, calc(100vw - 48px));
+  max-width: min(1180px, calc(100vw - var(--sidebar-width) - 48px));
   max-height: 92vh;
 }
 
@@ -76,6 +76,24 @@
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-glass-border);
+}
+
+@media (min-width: 1101px) {
+  .overlay:has(.modalXl) {
+    left: var(--sidebar-width);
+    width: calc(100vw - var(--sidebar-width));
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .overlay:has(.modalXl) {
+    left: 220px;
+    width: calc(100vw - 220px);
+  }
+
+  .modalXl {
+    max-width: calc(100vw - 220px - 32px);
+  }
 }
 
 /* Mobile: bottom sheet style modal */
