@@ -24,6 +24,11 @@
   position: relative;
 }
 
+.modalXl {
+  max-width: min(1180px, calc(100vw - 48px));
+  max-height: 92vh;
+}
+
 .modal::before {
   content: '';
   position: absolute;

@@ -1,0 +1,95 @@
+.preview {
+  width: 100%;
+  min-height: 520px;
+  max-height: min(78vh, 860px);
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: #d4d4d4;
+  color: #111827;
+}
+
+.preview.dark {
+  background: #1a1a2e;
+  color: #e0e0e8;
+}
+
+.preview :global(.docx-wrapper) {
+  background: #d4d4d4 !important;
+  padding: clamp(18px, 3vw, 44px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.preview :global(.docx-wrapper > section.docx) {
+  flex: 0 0 auto !important;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 12px 48px rgba(0, 0, 0, 0.12) !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  max-width: none !important;
+}
+
+.preview :global(.docx) img {
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.preview :global(.docx) table {
+  table-layout: auto !important;
+  word-wrap: normal !important;
+}
+
+.preview :global(.docx) * {
+  box-sizing: border-box !important;
+}
+
+.preview.dark :global(.docx-wrapper) {
+  background: #1a1a2e !important;
+}
+
+.preview.dark :global(.docx-wrapper > section.docx) {
+  background: #252540 !important;
+  color: #e0e0e8 !important;
+}
+
+.fallbackPaper {
+  width: min(794px, 100%);
+  min-height: 1123px;
+  margin: clamp(18px, 3vw, 44px) auto;
+  padding: 96px 76px;
+  background: #fff;
+  color: #111;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 12px 48px rgba(0, 0, 0, 0.12);
+  font-family: 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.fallbackPaper img {
+  max-width: 100%;
+  height: auto;
+}
+
+.dark .fallbackPaper {
+  background: #252540;
+  color: #e0e0e8;
+}
+
+.message {
+  margin-top: var(--space-3);
+  padding: 10px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.10);
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}

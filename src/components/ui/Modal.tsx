@@ -9,9 +9,10 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  size?: 'md' | 'xl';
 }
 
-export function Modal({ open, onClose, title, children, footer }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = 'md' }: ModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -31,7 +32,7 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
           onClick={onClose}
         >
           <motion.div
-            className={styles.modal}
+            className={`${styles.modal} ${size === 'xl' ? styles.modalXl : ''}`}
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}

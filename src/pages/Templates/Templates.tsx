@@ -5,7 +5,7 @@ import {
   FileText, Trash2, Eye, PenTool, Plus, Clock, CheckCircle,
   XCircle, Send, MessageSquare, User, ChevronDown,
 } from 'lucide-react';
-import { GlassCard, Button, Badge, FileDropZone, Modal, Input } from '@/components/ui/index.ts';
+import { GlassCard, Button, Badge, DocxPreview, FileDropZone, Modal, Input } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
 import { useDocumentStore } from '@/store/useDocumentStore.ts';
 import { useSettingsStore } from '@/store/useSettingsStore.ts';
@@ -423,17 +423,15 @@ export function Templates() {
         open={!!previewId}
         onClose={() => setPreviewId(null)}
         title={previewTemplate?.name ?? 'Перегляд'}
+        size="xl"
       >
         {previewTemplate && (
-          <div
-            style={{
-              background: darkPreview ? '#1a1a2e' : '#fff',
-              color: darkPreview ? '#e0e0e8' : '#000',
-              padding: '24px',
-              borderRadius: 'var(--radius-md)', maxHeight: '60vh',
-              overflow: 'auto', fontSize: '14px', lineHeight: '1.6',
-            }}
-            dangerouslySetInnerHTML={{ __html: previewTemplate.htmlPreview }}
+          <DocxPreview
+            file={previewTemplate.rawFile}
+            fileUrl={previewTemplate.fileUrl}
+            fileName={previewTemplate.fileName}
+            htmlFallback={previewTemplate.htmlPreview}
+            dark={darkPreview}
           />
         )}
       </Modal>
@@ -443,6 +441,7 @@ export function Templates() {
         open={!!reviewPreviewId}
         onClose={() => setReviewPreviewId(null)}
         title={reviewPreview?.name ?? 'Перегляд запиту'}
+        size="xl"
       >
         {reviewPreview && (
           <>
@@ -458,15 +457,12 @@ export function Templates() {
                 {reviewPreview.description}
               </p>
             )}
-            <div
-              style={{
-                background: darkPreview ? '#1a1a2e' : '#fff',
-                color: darkPreview ? '#e0e0e8' : '#000',
-                padding: '24px',
-                borderRadius: 'var(--radius-md)', maxHeight: '50vh',
-                overflow: 'auto', fontSize: '14px', lineHeight: '1.6',
-              }}
-              dangerouslySetInnerHTML={{ __html: reviewPreview.htmlPreview }}
+            <DocxPreview
+              file={reviewPreview.rawFile}
+              fileUrl={reviewPreview.fileUrl}
+              fileName={reviewPreview.fileName}
+              htmlFallback={reviewPreview.htmlPreview}
+              dark={darkPreview}
             />
           </>
         )}

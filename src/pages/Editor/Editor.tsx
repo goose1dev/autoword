@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Eye, FileText } from 'lucide-react';
-import { renderAsync } from 'docx-preview';
 import { saveAs } from 'file-saver';
-import { GlassCard, Button, Input } from '@/components/ui/index.ts';
+import { GlassCard, Button, DocxPreview, Input } from '@/components/ui/index.ts';
 import { Header } from '@/components/layout/Header.tsx';
 import { useDocumentStore } from '@/store/useDocumentStore.ts';
 import { useSettingsStore } from '@/store/useSettingsStore.ts';
@@ -21,9 +20,7 @@ export function Editor() {
   const activeTemplate = templates.find((t) => t.id === activeTemplateId);
 
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
-  const [previewError, setPreviewError] = useState('');
   const [exporting, setExporting] = useState(false);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   const previewHtml = useMemo(() => {
     if (!activeTemplate) return '';
@@ -48,55 +45,6 @@ export function Editor() {
     setFieldValues({});
   }, [activeTemplateId]);
 
-  useEffect(() => {
-    const container = previewRef.current;
-    if (!container) return;
-
-    let cancelled = false;
-    setPreviewError('');
-    container.innerHTML = '';
-
-    if (!activeTemplate) return;
-
-    if (activeTemplate.rawFile.size === 0) {
-      container.innerHTML = `<div class="${styles.htmlFallback}">${highlightedHtml}</div>`;
-      setPreviewError('Оригінальний .docx файл недоступний, тому показано спрощений HTML-перегляд.');
-      return;
-    }
-
-    (async () => {
-      try {
-        const buffer = await fillDocxTemplate(activeTemplate.rawFile, fieldValues);
-        if (cancelled) return;
-
-        container.innerHTML = '';
-        await renderAsync(buffer, container, undefined, {
-          className: 'docx',
-          inWrapper: true,
-          ignoreWidth: false,
-          ignoreHeight: false,
-          ignoreFonts: false,
-          breakPages: true,
-          ignoreLastRenderedPageBreak: false,
-          renderHeaders: true,
-          renderFooters: true,
-          renderFootnotes: true,
-          renderEndnotes: true,
-        });
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) {
-          container.innerHTML = `<div class="${styles.htmlFallback}">${highlightedHtml}</div>`;
-          setPreviewError('Не вдалося показати Word-перегляд. Показано спрощену версію.');
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTemplate, fieldValues, highlightedHtml]);
-
   const handleFieldChange = (key: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [key]: value }));
   };
@@ -112,6 +60,14 @@ export function Editor() {
           type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
         saveAs(blob, activeTemplate.fileName || `${activeTemplate.name}.docx`);
+      } else if (activeTemplate.fileUrl) {
+        const response = await fetch(activeTemplate.fileUrl);
+        const blob = await response.blob();
+        const file = new File([blob], activeTemplate.fileName, {
+          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+        const buffer = await fillDocxTemplate(file, fieldValues);
+        saveAs(new Blob([buffer], { type: blob.type }), activeTemplate.fileName || `${activeTemplate.name}.docx`);
       } else {
         await exportToDocx(previewHtml, activeTemplate.name);
       }
@@ -205,13 +161,14 @@ export function Editor() {
                   Попередній перегляд
                 </span>
               </div>
-              <div
-                ref={previewRef}
-                className={`${styles.previewContainer} ${darkPreview ? styles.dark : ''}`}
+              <DocxPreview
+                file={activeTemplate?.rawFile}
+                fileUrl={activeTemplate?.fileUrl}
+                fileName={activeTemplate?.fileName}
+                values={fieldValues}
+                htmlFallback={highlightedHtml}
+                dark={darkPreview}
               />
-              {previewError && (
-                <div className={styles.previewError}>{previewError}</div>
-              )}
             </GlassCard>
           </div>
         </div>

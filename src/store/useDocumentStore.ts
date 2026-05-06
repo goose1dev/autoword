@@ -16,15 +16,8 @@ import {
   extractFields,
   generateId,
 } from '@/services/documentService.ts';
-
-async function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+import { storage } from '@/lib/firebase.ts';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 function base64ToFile(base64: string, fileName: string): File {
   const [meta, data] = base64.split(',');
@@ -33,6 +26,17 @@ function base64ToFile(base64: string, fileName: string): File {
   const array = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
   return new File([array], fileName, { type: mime });
+}
+
+async function uploadDocxFile(folder: string, file: File): Promise<{ fileUrl: string; storagePath: string }> {
+  const safeName = file.name.replace(/[^\w.\-()[\] ]+/g, '_');
+  const storagePath = `${folder}/${crypto.randomUUID()}-${safeName}`;
+  const fileRef = ref(storage, storagePath);
+  await uploadBytes(fileRef, file, {
+    contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  });
+  const fileUrl = await getDownloadURL(fileRef);
+  return { fileUrl, storagePath };
 }
 
 interface DocumentStore {
@@ -79,6 +83,8 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
           rawFile: data.fileBase64
             ? base64ToFile(data.fileBase64, data.fileName)
             : new File([], data.fileName),
+          fileUrl: data.fileUrl,
+          storagePath: data.storagePath,
           htmlPreview: data.htmlPreview ?? '',
         } as DocumentTemplate;
       });
@@ -104,6 +110,8 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
           rawFile: data.fileBase64
             ? base64ToFile(data.fileBase64, data.fileName)
             : new File([], data.fileName),
+          fileUrl: data.fileUrl,
+          storagePath: data.storagePath,
           htmlPreview: data.htmlPreview ?? '',
         } as TemplateRequest;
       });
@@ -119,7 +127,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   addTemplate: async (file: File) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
-    const fileBase64 = await fileToBase64(file);
+    const uploaded = await uploadDocxFile('templates', file);
 
     await addDoc(collection(db, 'templates'), {
       name: file.name.replace(/\.docx$/i, ''),
@@ -127,7 +135,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       fileSize: file.size,
       uploadedAt: serverTimestamp(),
       fields,
-      fileBase64,
+      ...uploaded,
       htmlPreview,
     });
   },
@@ -147,6 +155,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
   submitTemplateRequest: async (file: File, submittedBy: string, description: string, submittedByUid: string) => {
     const htmlPreview = await convertDocxToHtml(file);
     const fields = extractFields(htmlPreview);
+    const uploaded = await uploadDocxFile('template-requests', file);
 
     await addDoc(collection(db, 'templateRequests'), {
       name: file.name.replace(/\.docx$/i, ''),
@@ -158,6 +167,7 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       submittedAt: serverTimestamp(),
       status: 'pending',
       fields,
+      ...uploaded,
       htmlPreview,
     });
   },
@@ -173,6 +183,8 @@ export const useDocumentStore = create<DocumentStore>((set) => ({
       fileSize: reqData.fileSize,
       uploadedAt: serverTimestamp(),
       fields: reqData.fields,
+      fileUrl: reqData.fileUrl,
+      storagePath: reqData.storagePath,
       htmlPreview: reqData.htmlPreview,
     };
 

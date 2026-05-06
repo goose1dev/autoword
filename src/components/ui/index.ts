@@ -4,3 +4,4 @@ export { Input } from './Input.tsx';
 export { Badge } from './Badge.tsx';
 export { Modal } from './Modal.tsx';
 export { FileDropZone } from './FileDropZone.tsx';
+export { DocxPreview } from './DocxPreview.tsx';

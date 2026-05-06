@@ -6,6 +6,8 @@ export interface DocumentTemplate {
   uploadedAt: Date;
   fields: TemplateField[];
   rawFile: File;
+  fileUrl?: string;
+  storagePath?: string;
   htmlPreview: string;
 }
 
@@ -60,6 +62,8 @@ export interface TemplateRequest {
   reviewComment?: string;
   fields: TemplateField[];
   rawFile: File;
+  fileUrl?: string;
+  storagePath?: string;
   htmlPreview: string;
 }
 
